@@ -34,10 +34,11 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       {
-        message: "You cant upvote twice",
+        message: "You cant downvote twice",
       },
       { status: 403 }
     );
