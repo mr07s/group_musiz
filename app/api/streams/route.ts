@@ -45,12 +45,13 @@ export async function POST(req: NextRequest) {
             : thumbnails[thumbnails.length - 1].url ?? "",
         bigImg: thumbnails[thumbnails.length - 1].url ?? "",
         type: "Youtube",
-        upvotes: 0,
+        // upvote: 0,
       },
     });
     return NextResponse.json({
-      message: "Stream Added Successfully",
-      id: stream?.id,
+      stream,
+      hasvoted: false,
+      upvote: 0,
     });
   } catch (e) {
     console.log(e);

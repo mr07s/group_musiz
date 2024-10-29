@@ -26,16 +26,18 @@ export async function POST(req: NextRequest) {
   }
   try {
     const data = UpvoteSchema.parse(await req.json());
-    await prismaClient.upvote.create({
+    const res = await prismaClient.upvote.create({
       data: {
         userId: user?.id,
         streamId: data?.streamId,
       },
     });
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       {
         message: "You cant upvote twice",
+        sucess: false,
       },
       { status: 403 }
     );

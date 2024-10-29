@@ -30,7 +30,6 @@ model Stream{
   smallImg    String    @default("")
   bigImg      String    @default("")
   active      Boolean   @default(true)
-  upvotes     Int
   userId      String
   user        User      @relation(fields:[userId],references:[id])
   upvote      Upvote[]
