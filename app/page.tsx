@@ -9,7 +9,7 @@ import Redirect from "./components/Redirect";
 export default function Home() {
   return (
     <main>
-      <Appbar />
+      {/* <Appbar /> */}
       <Redirect />
       <div className="flex flex-col min-h-screen">
         <main className="flex-1">

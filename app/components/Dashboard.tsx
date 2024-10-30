@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { ThumbsUp, ThumbsDown, Play, Share2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Redirect from "./Redirect";
 
 type Song = {
   id: string;
@@ -29,10 +30,14 @@ type Song = {
   haveupvoted: boolean;
 };
 
-export default function Dashboard() {
+export default function Dashboard({ creatorId }: { creatorId: string }) {
+  // const creatorId = creatorId;
+  console.log(creatorId);
   const REFRESH_INTERVAL_MS = 10 * 1000;
   const { toast } = useToast();
   const session = useSession();
+  console.log("Signed in with");
+  console.log(session.data?.user?.email);
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // const [creatorId] = useState(session.data?.user?.email);
@@ -63,7 +68,7 @@ export default function Dashboard() {
   //     setVideoUrl("");
   //   }
   // };
-
+  // if(!user)
   const vote = async (index: number, amount: number, id: string) => {
     setQueue(
       queue
@@ -94,52 +99,59 @@ export default function Dashboard() {
   };
 
   const playNext = () => {
-    if (queue.length > 0) {
+    if (queue?.length > 0) {
       setCurrentSong(queue[0]);
-      setQueue(queue.slice(1));
+      setQueue(queue?.slice(1));
     }
   };
 
   useEffect(() => {
-    if (!currentSong && queue.length > 0) {
+    if (!currentSong && queue?.length > 0) {
       playNext();
     }
   }, [queue, currentSong]);
 
   // getting streams from backend
-  async function refreshStreams() {
-    const { streams } = await fetch("/api/streams/my").then((res) =>
-      res.json()
-    );
+  const refreshStreams = async () => {
+    console.log("Refresh stream called");
+    const { streams } = await fetch(
+      `/api/streams/?creatorId=${creatorId}`
+    ).then((res) => res.json());
     console.log(streams);
     // // const s;
-    setQueue(streams);
-  }
+    setQueue(
+      streams.sort((a: Song, b: Song) => (a.upvote < b.upvote ? 1 : -1))
+    );
+  };
   useEffect(() => {
     refreshStreams();
-    // const interval = setInterval(() => {}, REFRESH_INTERVAL_MS);
+    const interval = setInterval(() => {
+      refreshStreams();
+    }, REFRESH_INTERVAL_MS);
   }, []);
 
   const sharePage = async () => {
     const shareData = {
       title: "Join my music stream!",
       text: "Vote for the next song in my stream!",
-      url: window.location.href,
+      url: `${window.location.hostname}/creator/${creatorId}`,
     };
 
-    if (navigator.share && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-        toast({
-          title: "Shared successfully!",
-          description: "Your fans can now join and vote.",
-        });
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
-    } else {
-      // Fallback to copying the URL
-      navigator.clipboard.writeText(window.location.href).then(
+    // if (navigator.share && navigator.canShare(shareData)) {
+    //   try {
+    //     await navigator.share(shareData);
+    //     toast({
+    //       title: "Shared successfully!",
+    //       description: "Your fans can now join and vote.",
+    //     });
+    //   } catch (err) {
+    //     console.error("Error sharing:", err);
+    //   }
+    // } else {
+    // Fallback to copying the URL
+    navigator.clipboard
+      .writeText(`${window.location.href}/creator/${creatorId}`)
+      .then(
         () => {
           toast({
             title: "Link copied to clipboard!",
@@ -150,7 +162,7 @@ export default function Dashboard() {
           console.error("Could not copy text: ", err);
         }
       );
-    }
+    // }
   };
 
   const handleSubmit = async (url: string) => {
@@ -158,11 +170,12 @@ export default function Dashboard() {
     const { stream } = await fetch("/api/streams", {
       method: "POST",
       body: JSON.stringify({
-        creatorId: "e242f3ff-9bd1-4f45-8780-aeb182e92730",
+        // creatorId: "e242f3ff-9bd1-4f45-8780-aeb182e92730",
+        creatorId: creatorId,
         url: videoUrl,
       }),
     }).then((res) => res.json());
-    stream.hasvoted = false;
+    stream.haveupvoted = false;
     stream.upvote = 0;
     console.log("The stream is");
     console.log(stream);
@@ -170,36 +183,50 @@ export default function Dashboard() {
     setVideoUrl("");
     setLoading(false);
   };
+  // if (!session?.data?.user) {
+  // }
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Song Voting Queue</CardTitle>
-          <Button onClick={sharePage} variant="outline" className="ml-auto">
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </Button>
-        </CardHeader>
+    <>
+      {!session?.data?.user ? (
+        <div className="w-full min-h-[100vh] flex justify-center items-center ">
+          <p className="">Sign In to view the Stream</p>
+        </div>
+      ) : (
+        <div className="container mx-auto p-4 space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Song Voting Queue</CardTitle>
+                  <Button
+                    onClick={sharePage}
+                    variant="outline"
+                    className="ml-auto"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
+                </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="flex space-x-2">
-            <Input
-              type="text"
-              placeholder="Enter YouTube URL"
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-            />
-            <Button
-              onClick={() => {
-                handleSubmit(videoUrl);
-              }}
-              disabled={loading}
-            >
-              {loading ? "Loading..." : "Add to Queue"}
-            </Button>
-          </div>
-          {/* {videoUrl && extractVideoId(videoUrl) && (
-            <div className="aspect-video">
+                <CardContent className="space-y-4">
+                  <div className="flex space-x-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter YouTube URL"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                    />
+                    <Button
+                      onClick={() => {
+                        handleSubmit(videoUrl);
+                      }}
+                      disabled={loading}
+                    >
+                      {loading ? "Loading..." : "Add to Queue"}
+                    </Button>
+                  </div>
+                  {/* {videoUrl && extractVideoId(videoUrl) && (
+              <div className="aspect-video">
               <iframe
                 width="100%"
                 height="100%"
@@ -209,109 +236,115 @@ export default function Dashboard() {
                 allowFullScreen
                 title="Video preview"
               />
+               </div>
+                )} */}
+                </CardContent>
+              </Card>
+              {videoUrl && !loading ? (
+                <div className="flex justify-center">
+                  <Card className="w-[25rem] h-[20rem] ">
+                    <CardContent className="space-y-4 h-full w-full p-4">
+                      <LiteYouTubeEmbed
+                        title=""
+                        id={`${extractVideoId(videoUrl)}`}
+                        aspectHeight={1.5}
+                        aspectWidth={2}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <></>
+              )}
+              {currentSong && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Now Playing</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src={`${currentSong.smallImg}`}
+                        alt={`Thumbnail for ${currentSong.title}`}
+                        className="w-24 h-18 object-cover rounded"
+                      />
+                      <div>
+                        <h3 className="font-bold">{currentSong.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          upvotes: {currentSong.upvote}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="aspect-video">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${extractVideoId(
+                          currentSong.url
+                        )}`}
+                        allowFullScreen
+                        title={`Now playing: ${currentSong?.title}`}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-          )} */}
-        </CardContent>
-      </Card>
-      {videoUrl && !loading ? (
-        <div className="flex justify-center">
-          <Card className="w-[25rem] h-[20rem] ">
-            <CardContent className="space-y-4 h-full w-full p-4">
-              <LiteYouTubeEmbed
-                title=""
-                id={`${extractVideoId(videoUrl)}`}
-                aspectHeight={1.5}
-                aspectWidth={2}
-              />
-            </CardContent>
-          </Card>
+            {/* </div> */}
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {queue?.map((song, index) => (
+                  <Card key={song?.id}>
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-lg">{song?.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <img
+                        src={`${song?.smallImg}`}
+                        alt={`Thumbnail for ${song?.title}`}
+                        className="w-full aspect-video object-cover rounded-md"
+                      />
+                    </CardContent>
+                    <CardFooter className="p-4 flex justify-between items-center">
+                      <div className="flex items-center space-x-2">
+                        {!song?.haveupvoted ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => vote(index, 1, song?.id)}
+                            aria-label={`Upvote ${song?.title}`}
+                          >
+                            <ThumbsUp className="w-4 h-4" />
+                            <span className="font-bold">{song?.upvote}</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => vote(index, -1, song?.id)}
+                            aria-label={`Downvote ${song?.title}`}
+                          >
+                            <ThumbsDown className="w-4 h-4" />
+                            <span className="font-bold">{song?.upvote}</span>
+                          </Button>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => playNext()}
+                        aria-label={`Play ${song?.title}`}
+                      >
+                        <Play className="w-4 h-4 mr-2" /> Play
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      ) : (
-        <></>
       )}
-      {currentSong && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Now Playing</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <img
-                src={`${currentSong.smallImg}`}
-                alt={`Thumbnail for ${currentSong.title}`}
-                className="w-24 h-18 object-cover rounded"
-              />
-              <div>
-                <h3 className="font-bold">{currentSong.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  upvotes: {currentSong.upvote}
-                </p>
-              </div>
-            </div>
-            <div className="aspect-video">
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${extractVideoId(
-                  currentSong.url
-                )}`}
-                allowFullScreen
-                title={`Now playing: ${currentSong?.title}`}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {queue.map((song, index) => (
-          <Card key={song?.id}>
-            <CardHeader className="p-4">
-              <CardTitle className="text-lg">{song?.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <img
-                src={`${song?.smallImg}`}
-                alt={`Thumbnail for ${song?.title}`}
-                className="w-full aspect-video object-cover rounded-md"
-              />
-            </CardContent>
-            <CardFooter className="p-4 flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                {!song?.haveupvoted ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => vote(index, 1, song?.id)}
-                    aria-label={`Upvote ${song?.title}`}
-                  >
-                    <ThumbsUp className="w-4 h-4" />
-                    <span className="font-bold">{song?.upvote}</span>
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => vote(index, -1, song?.id)}
-                    aria-label={`Downvote ${song?.title}`}
-                  >
-                    <ThumbsDown className="w-4 h-4" />
-                    <span className="font-bold">{song?.upvote}</span>
-                  </Button>
-                )}
-              </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => playNext()}
-                aria-label={`Play ${song?.title}`}
-              >
-                <Play className="w-4 h-4 mr-2" /> Play
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
