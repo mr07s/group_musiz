@@ -25,7 +25,7 @@ export default function ({
   return (
     <div>
       {/* <Redirect /> */}
-      <Dashboard creatorId={creatorId} />
+      <Dashboard creatorId={creatorId} playVideo={false} />
     </div>
   );
 }

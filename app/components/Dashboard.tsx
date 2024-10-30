@@ -30,7 +30,13 @@ type Song = {
   haveupvoted: boolean;
 };
 
-export default function Dashboard({ creatorId }: { creatorId: string }) {
+export default function Dashboard({
+  creatorId,
+  playVideo = false,
+}: {
+  creatorId: string;
+  playVideo: boolean;
+}) {
   // const creatorId = creatorId;
   console.log(creatorId);
   const REFRESH_INTERVAL_MS = 10 * 1000;
@@ -41,7 +47,7 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // const [creatorId] = useState(session.data?.user?.email);
-
+  const [playNextLoader, setPlayNextLoader] = useState(false);
   const [queue, setQueue] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>();
   console.log(currentSong);
@@ -49,7 +55,7 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
   const extractVideoId = (url: string) => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
+    const match = url?.match(regExp);
     console.log(match);
     return match && match[2].length === 11 ? match[2] : null;
   };
@@ -98,23 +104,38 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
     // }
   };
 
-  const playNext = () => {
-    if (queue?.length > 0) {
-      setCurrentSong(queue[0]);
-      setQueue(queue?.slice(1));
+  const playNext = async () => {
+    try {
+      if (queue?.length > 0) {
+        setPlayNextLoader(true);
+        console.log("Before");
+        const data = await fetch("/api/streams/next");
+        // console.log(await data.json());
+        console.log("After");
+        const { stream } = await data.json();
+        console.log(stream);
+        setCurrentSong(stream);
+        setPlayNextLoader(false);
+        // setQueue(queue?.slice(1));
+        // setPlayNextLoader(false);
+      } else {
+        console.log("Nothing to play");
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
-  useEffect(() => {
-    if (!currentSong && queue?.length > 0) {
-      playNext();
-    }
-  }, [queue, currentSong]);
+  // useEffect(() => {
+  //   if (!currentSong && queue?.length > 0) {
+  //     playNext();
+  //   }
+  // }, [queue]);
 
   // getting streams from backend
   const refreshStreams = async () => {
     console.log("Refresh stream called");
-    const { streams } = await fetch(
+    const { streams, activeStream } = await fetch(
       `/api/streams/?creatorId=${creatorId}`
     ).then((res) => res.json());
     console.log(streams);
@@ -122,6 +143,15 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
     setQueue(
       streams.sort((a: Song, b: Song) => (a.upvote < b.upvote ? 1 : -1))
     );
+    console.log("Active Stream");
+    console.log(activeStream?.stream);
+    setCurrentSong((currentSong) => {
+      if (currentSong?.id == activeStream.stream?.id) {
+        return currentSong;
+      } else {
+        return activeStream.stream;
+      }
+    });
   };
   useEffect(() => {
     refreshStreams();
@@ -150,7 +180,7 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
     // } else {
     // Fallback to copying the URL
     navigator.clipboard
-      .writeText(`${window.location.href}/creator/${creatorId}`)
+      .writeText(`${window.location.hostname}/creator/${creatorId}`)
       .then(
         () => {
           toast({
@@ -289,6 +319,18 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
                   </CardContent>
                 </Card>
               )}
+              {playVideo && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="w-full my-2 bg-black text-white"
+                  onClick={() => playNext()}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+
+                  {!playNextLoader ? "Play Next" : <p>Loading</p>}
+                </Button>
+              )}
             </div>
             {/* </div> */}
             <div>
@@ -329,14 +371,18 @@ export default function Dashboard({ creatorId }: { creatorId: string }) {
                           </Button>
                         )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => playNext()}
-                        aria-label={`Play ${song?.title}`}
-                      >
-                        <Play className="w-4 h-4 mr-2" /> Play
-                      </Button>
+                      {playVideo && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => playNext()}
+                          aria-label={`Play ${song?.title}`}
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+
+                          {!playNextLoader ? "Play" : <>"...Loadfing"</>}
+                        </Button>
+                      )}
                     </CardFooter>
                   </Card>
                 ))}

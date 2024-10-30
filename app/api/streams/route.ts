@@ -1,6 +1,6 @@
 import { prismaClient } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { promise, z } from "zod";
 //@ts-ignore
 import youtubesearchapi from "youtube-search-api";
 import { getServerSession } from "next-auth";
@@ -94,30 +94,45 @@ export async function GET(req: NextRequest) {
       { status: 411 }
     );
   }
-  const streams = await prismaClient.stream.findMany({
-    where: {
-      userId: creatorId,
-    },
-    include: {
-      _count: {
-        select: {
-          upvote: true,
+  const [streams, activeStream] = await Promise.all([
+    prismaClient.stream.findMany({
+      where: {
+        userId: creatorId,
+        played: false,
+      },
+      include: {
+        _count: {
+          select: {
+            upvote: true,
+          },
+        },
+        upvote: {
+          where: {
+            userId: user?.id,
+          },
         },
       },
-      upvote: {
-        where: {
-          userId: user?.id,
-        },
+    }),
+    prismaClient.currentStream.findFirst({
+      where: {
+        userId: creatorId,
+        // played: false,
       },
-    },
-  });
+      include: {
+        stream: true,
+      },
+    }),
+  ]);
+  // console.log(currneStream);
   // console.log(stream[0].title);
-
+  console.log("Active Stream is");
+  console.log(activeStream);
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,
       upvote: _count.upvote,
       haveupvoted: rest.upvote.length == 1 ? true : false,
     })),
+    activeStream,
   });
 }
