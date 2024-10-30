@@ -13,44 +13,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id       String @id @default(uuid())
-  email    String @unique
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
   provider Provider
   // role Role
-  streams Stream[]
-  upvote Upvote[]
+  streams  Stream[]
+  upvote   Upvote[]
 }
-model Stream{
-  id          String    @id @default(uuid())
-  type        StreamType
-  url         String
-  extractedId String
-  title       String    @default("")
-  smallImg    String    @default("")
-  bigImg      String    @default("")
-  active      Boolean   @default(true)
-  userId      String
-  user        User      @relation(fields:[userId],references:[id])
-  upvote      Upvote[]
+
+model Stream {
+  id            String         @id @default(uuid())
+  type          StreamType
+  url           String
+  extractedId   String
+  played        Boolean        @default(false)
+  playedTS      DateTime?       
+  createdAt     DateTime       @default(now())
+  title         String         @default("")
+  smallImg      String         @default("")
+  bigImg        String         @default("")
+  active        Boolean        @default(true)
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  upvote        Upvote[]
+  CurrentStream CurrentStream?
 }
-model Upvote{
-  id          String   @id @default(uuid())
-  userId      String
-  streamId    String
-  user        User      @relation(fields:[userId],references:[id])
-  stream      Stream    @relation(fields:[streamId],references:[id])
-  @@unique([userId,streamId])
+
+model CurrentStream {
+  // id       String  @id @default(uuid())
+  userId   String @id
+  streamId String? @unique
+  stream   Stream? @relation(fields: [streamId], references: [id])
 }
-enum StreamType{
+
+model Upvote {
+  id       String @id @default(uuid())
+  userId   String
+  streamId String
+  user     User   @relation(fields: [userId], references: [id])
+  stream   Stream @relation(fields: [streamId], references: [id],onDelete:Cascade)
+  @@unique([userId, streamId])
+}
+
+enum StreamType {
   Spotify
   Youtube
 }
-enum Role{
+
+enum Role {
   Streamer
   EndUser
 }
 
-enum Provider{
+enum Provider {
   Google
 }
