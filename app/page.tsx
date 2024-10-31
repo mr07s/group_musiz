@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Music, Users, Zap, Radio, Menu } from "lucide-react";
+import { Users, Zap, Radio } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { Appbar } from "./components/Appbar";
+// import Image from "next/image";
+// import { Appbar } from "./components/Appbar";
 import Redirect from "./components/Redirect";
 
 export default function Home() {

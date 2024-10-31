@@ -1,7 +1,7 @@
 import { prismaClient } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { promise, z } from "zod";
-//@ts-ignore
+import { z } from "zod";
+//@ts-expect-error
 import youtubesearchapi from "youtube-search-api";
 import { getServerSession } from "next-auth";
 
@@ -11,11 +11,14 @@ const CreateStreamSchema = z.object({
   creatorId: z.string(),
   url: z.string(),
 });
+const MAX_LIMIT = 15;
 export async function POST(req: NextRequest) {
   try {
     console.log("Reached here");
     const data = CreateStreamSchema.parse(await req.json());
+    const session = await getServerSession();
     const isYt = data.url.match(YT_REGX);
+
     if (!isYt) {
       return NextResponse.json(
         {
@@ -30,6 +33,24 @@ export async function POST(req: NextRequest) {
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
 
+    const user = await prismaClient.user.findFirst({
+      where: {
+        email: session?.user?.email ?? "",
+      },
+    });
+    const stream_added_count = await prismaClient.stream.count({
+      where: {
+        addedById: user?.id,
+      },
+    });
+    if (stream_added_count > MAX_LIMIT) {
+      return NextResponse.json(
+        {
+          message: "Already at limit",
+        },
+        { status: 411 }
+      );
+    }
     // console.log(res);
     const thumbnails = res.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
@@ -40,6 +61,7 @@ export async function POST(req: NextRequest) {
         userId: data.creatorId,
         url: data.url,
         extractedId,
+        addedById: user?.id ?? "",
         title: res.title ?? " Cant find video",
         smallImg:
           thumbnails.length > 1

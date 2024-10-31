@@ -18,7 +18,8 @@ model User {
   email    String   @unique
   provider Provider
   // role Role
-  streams  Stream[]
+  streams  Stream[] @relation("user")
+  added    Stream[] @relation("addedby")
   upvote   Upvote[]
 }
 
@@ -35,7 +36,9 @@ model Stream {
   bigImg        String         @default("")
   active        Boolean        @default(true)
   userId        String
-  user          User           @relation(fields: [userId], references: [id])
+  addedById     String
+  addedby       User           @relation(fields:[addedById],references:[id],name:"addedby")
+  user          User           @relation(fields: [userId], references: [id],name:"user")
   upvote        Upvote[]
   CurrentStream CurrentStream?
 }

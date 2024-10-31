@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "You cant downvote twice",
+        e,
       },
       { status: 403 }
     );

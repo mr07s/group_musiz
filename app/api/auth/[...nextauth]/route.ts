@@ -24,7 +24,7 @@ const handler = NextAuth({
         });
       } catch (e) {
         NextResponse.json(
-          { message: "Error While Authentication" },
+          { message: "Error While Authentication", e },
           { status: 411 }
         );
       }
