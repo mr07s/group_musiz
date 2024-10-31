@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width <= b.width ? -1 : 1
     );
+    console.log("Reached here");
     const stream = await prismaClient.stream.create({
       data: {
         userId: data.creatorId,
@@ -74,8 +75,8 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({
       stream,
-      hasvoted: false,
-      upvote: 0,
+      // hasvoted: false,
+      // upvote: 0,
     });
   } catch (e) {
     //console.log(e);
