@@ -30,8 +30,8 @@ export async function GET() {
       },
     },
   });
-  console.log("mostupvotedStream");
-  console.log(mostupvotedStream);
+  //console.log("mostupvotedStream");
+  //console.log(mostupvotedStream);
 
   await Promise.all([
     prismaClient.currentStream.upsert({
@@ -56,7 +56,7 @@ export async function GET() {
       },
     }),
   ]);
-  console.log("Request fullfilled");
+  //console.log("Request fullfilled");
   return NextResponse.json({
     stream: mostupvotedStream,
   });

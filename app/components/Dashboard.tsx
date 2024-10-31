@@ -40,12 +40,12 @@ export default function Dashboard({
   playVideo: boolean;
 }) {
   // const creatorId = creatorId;
-  console.log(creatorId);
+  //console.log(creatorId);
   const REFRESH_INTERVAL_MS = 10 * 1000;
   const { toast } = useToast();
   const session = useSession();
-  console.log("Signed in with");
-  console.log(session.data?.user?.email);
+  //console.log("Signed in with");
+  //console.log(session.data?.user?.email);
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // const [creatorId] = useState(session.data?.user?.email);
@@ -53,13 +53,13 @@ export default function Dashboard({
   const [queue, setQueue] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>();
   // const [setNovideoLeft] = useState<boolean>(false);
-  console.log(currentSong);
+  //console.log(currentSong);
   const videoRef = useRef<HTMLDivElement>();
   const extractVideoId = (url: string) => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url?.match(regExp);
-    console.log(match);
+    //console.log(match);
     return match && match[2].length === 11 ? match[2] : null;
   };
 
@@ -103,7 +103,7 @@ export default function Dashboard({
         body: JSON.stringify({ streamId: id }),
       }
     ).then((res) => res.json());
-    console.log(res);
+    //console.log(res);
     // if (res.success) {
     // }
   };
@@ -119,8 +119,8 @@ export default function Dashboard({
     player.playVideo();
     // @ts-ignore
     function eventHandler(event: any) {
-      console.log("Event data");
-      console.log(event.data);
+      //console.log("Event data");
+      //console.log(event.data);
       if (event.data === 0) {
         playNext();
       }
@@ -136,21 +136,21 @@ export default function Dashboard({
     try {
       if (queue?.length > 0) {
         setPlayNextLoader(true);
-        console.log("Before");
+        //console.log("Before");
         const data = await fetch("/api/streams/next");
-        // console.log(await data.json());
-        console.log("After");
+        // //console.log(await data.json());
+        //console.log("After");
         const { stream } = await data.json();
-        console.log(stream);
+        //console.log(stream);
         setCurrentSong(stream);
         setQueue((q) => q.filter((x) => x.id !== stream?.id));
         setPlayNextLoader(false);
         // setPlayNextLoader(false);
       } else {
-        console.log("Nothing to play");
+        //console.log("Nothing to play");
       }
     } catch (e) {
-      console.log(e);
+      //console.log(e);
     }
   };
 
@@ -162,17 +162,17 @@ export default function Dashboard({
 
   // getting streams from backend
   const refreshStreams = async () => {
-    console.log("Refresh stream called");
+    //console.log("Refresh stream called");
     const { streams, activeStream } = await fetch(
       `/api/streams/?creatorId=${creatorId}`
     ).then((res) => res.json());
-    console.log(streams);
+    //console.log(streams);
     // // const s;
     setQueue(
       streams.sort((a: Song, b: Song) => (a.upvote < b.upvote ? 1 : -1))
     );
-    console.log("Active Stream");
-    console.log(activeStream?.stream);
+    //console.log("Active Stream");
+    //console.log(activeStream?.stream);
     setCurrentSong((currentSong) => {
       if (currentSong?.id == activeStream?.stream?.id) {
         return currentSong;
@@ -235,8 +235,8 @@ export default function Dashboard({
     }).then((res) => res.json());
     stream.haveupvoted = false;
     stream.upvote = 0;
-    console.log("The stream is");
-    console.log(stream);
+    //console.log("The stream is");
+    //console.log(stream);
     setQueue([...queue, stream]);
     setVideoUrl("");
     setLoading(false);

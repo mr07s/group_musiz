@@ -14,7 +14,7 @@ const CreateStreamSchema = z.object({
 const MAX_LIMIT = 15;
 export async function POST(req: NextRequest) {
   try {
-    console.log("Reached here");
+    //console.log("Reached here");
     const data = CreateStreamSchema.parse(await req.json());
     const session = await getServerSession();
     const isYt = data.url.match(YT_REGX);
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         { status: 411 }
       );
     }
-    // console.log(res);
+    // //console.log(res);
     const thumbnails = res.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width <= b.width ? -1 : 1
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       upvote: 0,
     });
   } catch (e) {
-    console.log(e);
+    //console.log(e);
     return NextResponse.json(
       {
         message: "Error while adding a Stream",
@@ -91,10 +91,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  console.log("req");
-  console.log("This is called");
+  //console.log("req");
+  //console.log("This is called");
   // const session = useServer
-  // console.log(req.nextUrl.searchParams);
+  // //console.log(req.nextUrl.searchParams);
   const session = await getServerSession();
   //You can get rid of this database call by using seesion value find it how to use it
   const user = await prismaClient.user.findFirst({
@@ -102,12 +102,12 @@ export async function GET(req: NextRequest) {
       email: session?.user?.email || " ",
     },
   });
-  console.log("This is user id");
-  console.log(user?.id);
+  //console.log("This is user id");
+  //console.log(user?.id);
   // if (!user) {
   // }
   const creatorId = req.nextUrl.searchParams.get("creatorId");
-  console.log(creatorId);
+  //console.log(creatorId);
   if (!creatorId) {
     return NextResponse.json(
       {
@@ -145,10 +145,10 @@ export async function GET(req: NextRequest) {
       },
     }),
   ]);
-  // console.log(currneStream);
-  // console.log(stream[0].title);
-  console.log("Active Stream is");
-  console.log(activeStream);
+  // //console.log(currneStream);
+  // //console.log(stream[0].title);
+  //console.log("Active Stream is");
+  //console.log(activeStream);
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,

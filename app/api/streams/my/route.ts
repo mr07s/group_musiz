@@ -21,7 +21,7 @@ export async function GET() {
       }
     );
   }
-  console.log(user.id);
+  //console.log(user.id);
   const streams = await prismaClient.stream.findMany({
     where: {
       userId: user.id,
@@ -39,7 +39,7 @@ export async function GET() {
       },
     },
   });
-  // console.log(stream[0].title);
+  // //console.log(stream[0].title);
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,
