@@ -96,13 +96,10 @@ export default function Dashboard({
         )
         .sort((a, b) => b.upvote - a.upvote)
     );
-    const res = await fetch(
-      `/api/streams/${amount == 1 ? "upvote" : "downvote"}`,
-      {
-        method: "POST",
-        body: JSON.stringify({ streamId: id }),
-      }
-    ).then((res) => res.json());
+    await fetch(`/api/streams/${amount == 1 ? "upvote" : "downvote"}`, {
+      method: "POST",
+      body: JSON.stringify({ streamId: id }),
+    }).then((res) => res.json());
     //console.log(res);
     // if (res.success) {
     // }
@@ -150,7 +147,7 @@ export default function Dashboard({
         //console.log("Nothing to play");
       }
     } catch (e) {
-      //console.log(e);
+      console.log(e);
     }
   };
 

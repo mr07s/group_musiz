@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "Error while adding a Stream",
+        e,
       },
       {
         status: 411,
