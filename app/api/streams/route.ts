@@ -12,12 +12,9 @@ const CreateStreamSchema = z.object({
   url: z.string(),
 });
 const MAX_LIMIT = 15;
+
 export async function POST(req: NextRequest) {
   try {
-    console.log("Reached here");
-    NextResponse.json({
-      message: "Successfull",
-    });
     const data = CreateStreamSchema.parse(await req.json());
     const session = await getServerSession();
     const isYt = data.url.match(YT_REGX);
@@ -55,11 +52,13 @@ export async function POST(req: NextRequest) {
       );
     }
     console.log("Rate limit checked and done");
+    console.log(res);
 
-    const thumbnails = res.thumbnail.thumbnails;
-    thumbnails.sort((a: { width: number }, b: { width: number }) =>
+    const thumbnails = res.thumbnail?.thumbnails;
+    thumbnails?.sort((a: { width: number }, b: { width: number }) =>
       a.width <= b.width ? -1 : 1
     );
+    console.log(thumbnails);
     console.log("Finally Reached here");
 
     const stream = await prismaClient.stream.create({
@@ -70,7 +69,7 @@ export async function POST(req: NextRequest) {
         addedById: user?.id ?? "",
         title: res.title ?? " Cant find video",
         smallImg:
-          thumbnails.length > 1
+          thumbnails?.length > 1
             ? thumbnails[thumbnails.length - 2].url ?? ""
             : thumbnails[thumbnails.length - 1].url ?? "",
         bigImg: thumbnails[thumbnails.length - 1].url ?? "",
