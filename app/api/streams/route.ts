@@ -15,6 +15,9 @@ const MAX_LIMIT = 15;
 export async function POST(req: NextRequest) {
   try {
     console.log("Reached here");
+    NextResponse.json({
+      message: "Successfull",
+    });
     const data = CreateStreamSchema.parse(await req.json());
     const session = await getServerSession();
     const isYt = data.url.match(YT_REGX);
@@ -82,8 +85,13 @@ export async function POST(req: NextRequest) {
       // upvote: 0,
     });
   } catch (e) {
-    //console.log(e);
-    return NextResponse.json({ e: e });
+    console.log(e);
+    return NextResponse.json(
+      {
+        message: "error",
+      },
+      { status: 411 }
+    );
   }
 }
 

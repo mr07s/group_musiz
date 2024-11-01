@@ -163,13 +163,11 @@ export default function Dashboard({
     const { streams, activeStream } = await fetch(
       `/api/streams/?creatorId=${creatorId}`
     ).then((res) => res.json());
-    //console.log(streams);
-    // // const s;
+
     setQueue(
       streams.sort((a: Song, b: Song) => (a.upvote < b.upvote ? 1 : -1))
     );
-    //console.log("Active Stream");
-    //console.log(activeStream?.stream);
+
     setCurrentSong((currentSong) => {
       if (currentSong?.id == activeStream?.stream?.id) {
         return currentSong;
@@ -181,7 +179,7 @@ export default function Dashboard({
   useEffect(() => {
     refreshStreams();
     setInterval(() => {
-      refreshStreams();
+      // refreshStreams();
     }, REFRESH_INTERVAL_MS);
   }, []);
 
@@ -225,14 +223,24 @@ export default function Dashboard({
     setLoading(true);
     const { stream } = await fetch("/api/streams/", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         // creatorId: "e242f3ff-9bd1-4f45-8780-aeb182e92730",
         creatorId: creatorId,
         url: videoUrl,
       }),
     }).then((res) => res.json());
-    // stream.haveupvoted = false;
-    // stream.upvote = 0;
+    console.log("Before");
+    console.log(stream);
+
+    if (stream) {
+      stream.haveupvoted = false;
+      stream.upvote = 0;
+    }
+    console.log("After");
+    console.log(stream);
     //console.log("The stream is");
     //console.log(stream);
     setQueue([...queue, stream]);
