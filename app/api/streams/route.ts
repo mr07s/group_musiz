@@ -15,6 +15,7 @@ const MAX_LIMIT = 15;
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("reached here");
     const data = CreateStreamSchema.parse(await req.json());
     const session = await getServerSession();
     const isYt = data.url.match(YT_REGX);
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
         email: session?.user?.email ?? "",
       },
     });
+
     const stream_added_count = await prismaClient.stream.count({
       where: {
         addedById: user?.id,
@@ -52,13 +54,13 @@ export async function POST(req: NextRequest) {
       );
     }
     console.log("Rate limit checked and done");
-    console.log(res);
+    // console.log(res);
 
-    const thumbnails = await res?.thumbnail?.thumbnails;
-    thumbnails?.sort((a: { width: number }, b: { width: number }) =>
-      a.width <= b.width ? -1 : 1
-    );
-    console.log(thumbnails);
+    // const thumbnails = await res?.thumbnail?.thumbnails;
+    // thumbnails?.sort((a: { width: number }, b: { width: number }) =>
+    //   a.width <= b.width ? -1 : 1
+    // );
+    // console.log(thumbnails);
     console.log("Finally Reached here");
 
     const stream = await prismaClient.stream.create({
