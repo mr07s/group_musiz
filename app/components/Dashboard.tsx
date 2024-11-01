@@ -179,7 +179,7 @@ export default function Dashboard({
   useEffect(() => {
     refreshStreams();
     setInterval(() => {
-      // refreshStreams();
+      refreshStreams();
     }, REFRESH_INTERVAL_MS);
   }, []);
 
