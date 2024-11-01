@@ -83,14 +83,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     //console.log(e);
-    return NextResponse.json(
-      {
-        e,
-      },
-      {
-        status: 411,
-      }
-    );
+    return NextResponse.json({ e: e });
   }
 }
 

@@ -230,8 +230,8 @@ export default function Dashboard({
         url: videoUrl,
       }),
     }).then((res) => res.json());
-    stream.haveupvoted = false;
-    stream.upvote = 0;
+    // stream.haveupvoted = false;
+    // stream.upvote = 0;
     //console.log("The stream is");
     //console.log(stream);
     setQueue([...queue, stream]);
