@@ -68,11 +68,12 @@ export async function POST(req: NextRequest) {
         extractedId,
         addedById: user?.id ?? "",
         title: res?.title ?? " Cant find video",
-        smallImg:
-          thumbnails?.length > 1
-            ? thumbnails[thumbnails?.length - 2]?.url ?? ""
-            : thumbnails[thumbnails?.length - 1]?.url ?? "",
-        bigImg: thumbnails[thumbnails?.length - 1]?.url ?? "",
+        smallImg: "",
+        // thumbnails?.length > 1
+        //   ? thumbnails[thumbnails?.length - 2]?.url ?? ""
+        //   : thumbnails[thumbnails?.length - 1]?.url ?? "",
+        bigImg: " ",
+        //  thumbnails[thumbnails?.length - 1]?.url ?? "",
         type: "Youtube",
         // upvote: 0,
       },
