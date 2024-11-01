@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     console.log("Rate limit checked and done");
     console.log(res);
 
-    const thumbnails = res.thumbnail?.thumbnails;
+    const thumbnails = await res.thumbnail?.thumbnails;
     thumbnails?.sort((a: { width: number }, b: { width: number }) =>
       a.width <= b.width ? -1 : 1
     );
@@ -67,12 +67,12 @@ export async function POST(req: NextRequest) {
         url: data?.url,
         extractedId,
         addedById: user?.id ?? "",
-        title: res.title ?? " Cant find video",
+        title: res?.title ?? " Cant find video",
         smallImg:
           thumbnails?.length > 1
-            ? thumbnails[thumbnails.length - 2].url ?? ""
-            : thumbnails[thumbnails.length - 1].url ?? "",
-        bigImg: thumbnails[thumbnails.length - 1].url ?? "",
+            ? thumbnails[thumbnails?.length - 2]?.url ?? ""
+            : thumbnails[thumbnails?.length - 1]?.url ?? "",
+        bigImg: thumbnails[thumbnails?.length - 1]?.url ?? "",
         type: "Youtube",
         // upvote: 0,
       },
