@@ -220,9 +220,10 @@ export default function Dashboard({
     // }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    const { stream } = await fetch("/api/streams", {
+    const { stream } = await fetch("/api/streams/", {
       method: "POST",
       body: JSON.stringify({
         // creatorId: "e242f3ff-9bd1-4f45-8780-aeb182e92730",
@@ -271,12 +272,7 @@ export default function Dashboard({
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
                     />
-                    <Button
-                      onClick={() => {
-                        handleSubmit();
-                      }}
-                      disabled={loading}
-                    >
+                    <Button onClick={handleSubmit} disabled={loading}>
                       {loading ? "Loading..." : "Add to Queue"}
                     </Button>
                   </div>
