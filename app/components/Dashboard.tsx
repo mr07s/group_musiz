@@ -256,10 +256,10 @@ export default function Dashboard({
           <p className="">Sign In to view the Stream</p>
         </div>
       ) : (
-        <div className="container mx-auto p-4 space-y-6">
+        <div className="container mx-auto p-4 space-y-6 pt-16">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <Card>
+              <Card className="mb-4">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>Song Voting Queue</CardTitle>
                   <Button
@@ -300,7 +300,7 @@ export default function Dashboard({
                 </CardContent>
               </Card>
               {videoUrl && !loading ? (
-                <div className="flex justify-center">
+                <div className="flex justify-center  mb-4">
                   <Card className="w-[25rem] h-[20rem] ">
                     <CardContent className="space-y-4 h-full w-full p-4">
                       <LiteYouTubeEmbed
@@ -318,17 +318,19 @@ export default function Dashboard({
               {currentSong && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Now Playing</CardTitle>
+                    <CardTitle className="ml-4">Now Playing</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex  items-center space-x-4">
                       <img
                         src={`${currentSong?.smallImg}`}
-                        alt={`Thumbnail for ${currentSong.title}`}
-                        className="24 h-18 object-cover rounded"
+                        // alt={`Thumbnail `}
+                        className="w-24 h-18 object-cover rounded text:sm"
                       />
                       <div>
-                        <h3 className="font-bold">{currentSong.title}</h3>
+                        <h3 className="font-bold text-sm md:text-lg">
+                          {currentSong.title}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                           upvotes: {currentSong.upvote}
                         </p>
@@ -336,7 +338,7 @@ export default function Dashboard({
                     </div>
                     <div className="aspect-video">
                       {/* @ts-expect-error */}
-                      <div ref={videoRef} className="w-full" />
+                      <div ref={videoRef} className="w-full " />
                       {/* <iframe
                         width="100%"
                         height="100%"
@@ -366,10 +368,16 @@ export default function Dashboard({
             {/* </div> */}
             <div>
               {queue.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <>
+                <div className="flex-row justify-center items-center static mb-8 scroll-smooth  focus:scroll-auto overflow-scroll  h-[100vh] md:fixed  ">
+                  <div className="mb-20">
+                    <p className="ml-8 mt-6 font-semibold ">
+                      Songs in the Playist
+                    </p>
                     {queue?.map((song, index) => (
-                      <Card key={song?.id}>
+                      <Card
+                        key={song?.id}
+                        className="w-[90%] h-88 mt-2 ml-auto mr-auto mb-2"
+                      >
                         <CardHeader className="p-4">
                           <CardTitle className="text-lg">
                             {song?.title}
@@ -379,7 +387,7 @@ export default function Dashboard({
                           <img
                             src={`${song?.smallImg}`}
                             alt={`Thumbnail for ${song?.title}`}
-                            className="w-full aspect-video object-cover rounded-md"
+                            className="w-full aspect-video object-cover  rounded-md"
                           />
                         </CardContent>
                         <CardFooter className="p-4 flex justify-between items-center">
@@ -425,7 +433,7 @@ export default function Dashboard({
                         </CardFooter>
                       </Card>
                     ))}
-                  </>
+                  </div>
                 </div>
               ) : (
                 <div className="w-full h-full flex justify-center pt-4">

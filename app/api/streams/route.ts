@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     console.log("Rate limit checked and done");
     console.log(res);
 
-    const thumbnails = await res.thumbnail?.thumbnails;
+    const thumbnails = await res?.thumbnail?.thumbnails;
     thumbnails?.sort((a: { width: number }, b: { width: number }) =>
       a.width <= b.width ? -1 : 1
     );
